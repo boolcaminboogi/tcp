@@ -1,0 +1,47 @@
+chk	체크박스
+cb	콤보박스
+ed	에디터
+st	startic
+
+[TCPSetting
+eReconTCP_IPSet			ed
+
+eReconTCP_Ins_Port1			ed
+eReconTCP_Ins_Port1_CnBTN		btn
+eReconTCP_Ins_Port1_Status		btn
+
+eReconTCP_Ins_Port2			ed
+eReconTCP_Ins_Port2_CnBTN		btn
+eReconTCP_Ins_Port2_Status		btn
+
+eReconTCP_Ins_Port3			ed
+eReconTCP_Ins_Port3_CnBTN		btn
+eReconTCP_Ins_Port3_Status		btn
+
+eReconTCP_Ins_Port4			ed
+eReconTCP_Ins_Port4_CnBTN		btn
+eReconTCP_Ins_Port4_Status		btn
+__________________________________________________________________
+
+eReconTCP_Sch_Packet1		ed
+eReconTCP_Sch_Packet1_CnBTN		btn
+eReconTCP_Sch_Packet1_Status		btn
+
+eReconTCP_Sch_Packet2		ed
+eReconTCP_Sch_Packet2_CnBTN		btn
+eReconTCP_Sch_Packet2_Status		btn
+
+eReconTCP_Sch_Packet3		ed
+eReconTCP_Sch_Packet3_CnBTN		btn
+eReconTCP_Sch_Packet3_Status		btn
+
+eReconTCP_Sch_Packet4		ed
+eReconTCP_Sch_Packet4_CnBTN		btn
+eReconTCP_Sch_Packet4_Status		btn
+
+EReconTCP_End
+
+
+
+
+

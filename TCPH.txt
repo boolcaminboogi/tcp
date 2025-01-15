@@ -1,0 +1,84 @@
+#pragma once
+
+#include "pch.h"
+#include "BaseTitleWnd.h"
+#include "MenuButton.h"
+#include "NormalButton.h"
+
+// CWndSystem 창
+class CWndTcp : public CBaseTitleWnd
+{
+    DECLARE_DYNAMIC(CWndTcp)
+
+public:
+    CWndTcp();
+    virtual ~CWndTcp();
+
+    // IP Address 관련 컨트롤
+    CNormalStatic m_stIP;        // "IP Address" 레이블
+    CNormalEdit m_edIP;          // IP Address 입력창
+
+    // Port 및 XR Number 관련 컨트롤
+    CNormalStatic m_stPort1;          // Port 1 입력창
+    CNormalStatic m_stPck1;          // Port 1 입력창
+
+    // Port 1 관련 컨트롤
+    CNormalEdit m_edPort1;          // Port 1 입력창
+    CMenuButton m_btnPort1Cn;     // Port 1 연결 버튼
+    CNormalButton m_btnPort1Status; // Port 1 상태 버튼
+
+    // Port 2 관련 컨트롤
+    CNormalEdit m_edPort2;
+    CMenuButton m_btnPort2Cn;
+    CNormalButton m_btnPort2Status;
+
+    // Port 3 관련 컨트롤
+    CNormalEdit m_edPort3;
+    CMenuButton m_btnPort3Cn;
+    CNormalButton m_btnPort3Status;
+
+    // Port 4 관련 컨트롤
+    CNormalEdit m_edPort4;
+    CMenuButton m_btnPort4Cn;
+    CNormalButton m_btnPort4Status;
+
+    // Pck 1 관련 컨트롤
+    CNormalEdit m_edPck1;          // Pck 1 입력창
+    CMenuButton m_btnPck1Cn;     // Pck 1 연결 버튼
+    CNormalButton m_btnPck1Status; // Pck 1 상태 버튼
+
+    // Pck 2 관련 컨트롤
+    CNormalEdit m_edPck2;
+    CMenuButton m_btnPck2Cn;
+    CNormalButton m_btnPck2Status;
+
+    // Pck 3 관련 컨트롤
+    CNormalEdit m_edPck3;
+    CMenuButton m_btnPck3Cn;
+    CNormalButton m_btnPck3Status;
+
+    // Pck 4 관련 컨트롤
+    CNormalEdit m_edPck4;
+    CMenuButton m_btnPck4Cn;
+    CNormalButton m_btnPck4Status;
+
+    COLORREF m_btnColors[4]; // 버튼 색상 저장 (4개 포트용)
+
+protected:
+    DECLARE_MESSAGE_MAP()
+
+    bool m_examplestatus;
+
+    // 메시지 처리기
+    afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+    afx_msg void OnSize(UINT nType, int cx, int cy);
+    //afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor); // OnCtlColor 함수 선언
+    afx_msg void OnBnClicked(UINT nID);
+    afx_msg void OnChangeEditData(UINT nID);
+
+    void SetSelectedStyle();
+    void SetUnSelectedStyle();
+    void UpdateReconParameter();
+};
+
+

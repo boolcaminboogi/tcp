@@ -1,0 +1,438 @@
+// CWndTcp.cpp: 수정된 코드
+
+#include "pch.h"
+#include "XRecon.h"
+#include "CWndTcp.h"
+
+
+#define INT_MAX_FONT_SIZE					21
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+
+// IDC 정의
+#define IDC_STATIC_IP                 1
+#define IDC_STATIC_PORTNUM            3
+#define IDC_STATIC_XRNUM              4
+#define IDC_STATIC_PORT1            5
+#define IDC_STATIC_PCK1              6
+
+
+// 포트 관련 IDC
+#define IDC_EDIT_IP                   10
+#define IDC_EDIT_PORT1                11
+#define IDC_EDIT_PORT2                12
+#define IDC_EDIT_PORT3                13
+#define IDC_EDIT_PORT4                14
+
+#define IDC_BTN_PORT1CN               21
+#define IDC_BTN_PORT2CN               22
+#define IDC_BTN_PORT3CN               23
+#define IDC_BTN_PORT4CN               24
+
+#define IDC_BTN_PORT1STATUS           31
+#define IDC_BTN_PORT2STATUS           32
+#define IDC_BTN_PORT3STATUS           33
+#define IDC_BTN_PORT4STATUS           34
+
+#define IDC_BTN_PCK1CN                41
+#define IDC_BTN_PCK1STATUS            42
+#define IDC_EDIT_PCK1                 43
+
+IMPLEMENT_DYNAMIC(CWndTcp, CBaseTitleWnd)
+
+CWndTcp::CWndTcp()
+{
+}
+
+CWndTcp::~CWndTcp()
+{
+}
+
+BEGIN_MESSAGE_MAP(CWndTcp, CBaseTitleWnd)
+    ON_WM_CREATE()
+    ON_WM_SIZE()
+    ON_WM_CTLCOLOR()
+    ON_CONTROL_RANGE(BN_CLICKED, IDC_BTN_PORT1CN, IDC_EDIT_PCK1, OnBnClicked)
+END_MESSAGE_MAP()
+
+int CWndTcp::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+    if (CBaseTitleWnd::OnCreate(lpCreateStruct) == -1)
+        return -1;
+
+    // m_examplestatus 초기값 설정
+    m_examplestatus = false; // 상태 초기화: true (Connected)
+
+   m_btnPort1Cn.SetSkinBkColor(RGB_BG);
+   m_btnPort1Status.SetSkinBkColor(RGB_BG);
+   m_btnPck1Cn.SetSkinBkColor(RGB_BG);
+   m_btnPck1Status.SetSkinBkColor(RGB_BG);
+
+    // IP Address Static 및 Edit Control 생성
+    m_stIP.Create(_T("IP Address"), WS_CHILD | WS_VISIBLE, CRect(), this, IDC_STATIC_IP);
+    m_edIP.Create(WS_CHILD | WS_VISIBLE | WS_BORDER, CRect(), this, IDC_EDIT_IP);
+    
+    m_stPort1.Create(_T("PORT 1"), WS_CHILD | WS_VISIBLE, CRect(), this, IDC_STATIC_PORT1);
+    m_edPort1.Create(WS_CHILD | WS_VISIBLE | WS_BORDER, CRect(), this, IDC_EDIT_PORT1);
+    m_stPck1.Create(_T("PACKET 1"), WS_CHILD | WS_VISIBLE, CRect(), this, IDC_STATIC_PCK1);
+    m_edPck1.Create(WS_CHILD | WS_VISIBLE | WS_BORDER, CRect(), this, IDC_EDIT_PCK1);
+
+    m_btnPort1Cn.Create(_T(""), WS_PUSHBUTTON | BS_MULTILINE, CRect(), this, IDC_BTN_PORT1CN);
+    m_btnPort1Status.Create(_T(""), WS_PUSHBUTTON | BS_MULTILINE, CRect(), this, IDC_BTN_PORT1STATUS);
+    if (m_examplestatus) {
+        m_btnPort1Status.SetSkinBkColor(RGB(0, 255, 0)); // 초록색
+    }
+    else {
+        m_btnPort1Status.SetSkinBkColor(RGB(192, 192, 192)); // 회색
+    }
+    m_btnPck1Cn.Create(_T(""), WS_PUSHBUTTON | WS_PUSHBUTTON | BS_MULTILINE, CRect(), this, IDC_BTN_PCK1CN);
+    m_btnPck1Status.Create(_T(""), WS_CHILD | WS_PUSHBUTTON | BS_MULTILINE, CRect(), this, IDC_BTN_PCK1STATUS);
+    if (m_examplestatus) {
+        m_btnPck1Status.SetSkinBkColor(RGB(0, 255, 0)); // 초록색
+    }
+    else {
+        m_btnPck1Status.SetSkinBkColor(RGB(192, 192, 192)); // 회색
+    }
+}
+
+void CWndTcp::OnSize(UINT nType, int cx, int cy)
+{
+    CBaseTitleWnd::OnSize(nType, cx, cy);
+
+    int nGapX = (int)(cx * 0.03);
+    int nGapY = 10;
+    int nBtnGapY = 5;
+    int nBtnWidth = (int)(cx * 0.21);
+    int nBtnHeight = 30; // 버튼 높이를 약간 높임
+    int nFontSize = nBtnHeight - 10;
+
+    CRect rtCtrl;
+
+    // IP Address 배치
+    rtCtrl.left = nGapX;
+    rtCtrl.top = m_nTitleHeight + nGapY;
+    rtCtrl.right = cx - nGapX * 2;
+    rtCtrl.bottom = rtCtrl.top + nBtnHeight;
+    if (m_stIP.GetSafeHwnd()) {
+        m_stIP.MoveWindow(rtCtrl);
+        m_stIP.SetFontSize(nFontSize, FW_BOLD);
+        m_stIP.SetSkinBkColor(RGB_BG);
+    }
+
+    rtCtrl.top = rtCtrl.bottom + nGapY;
+    rtCtrl.bottom = rtCtrl.top + nBtnHeight;
+    if (m_edIP.GetSafeHwnd()) {
+        m_edIP.MoveWindow(rtCtrl);
+        m_edIP.SetFontSize(nFontSize);
+    }
+
+    // Port1 Static 배치
+    rtCtrl.left = nGapX;
+    rtCtrl.top = rtCtrl.bottom + nGapY;
+    rtCtrl.right = rtCtrl.left + nBtnWidth;
+    rtCtrl.bottom = rtCtrl.top + nBtnHeight;
+    if (m_stPort1.GetSafeHwnd()) {
+        m_stPort1.MoveWindow(rtCtrl);
+        m_stPort1.SetFontSize(nFontSize, FW_BOLD);
+        m_stPort1.SetSkinBkColor(RGB_BG);
+    }
+
+    // Pck1 Static 배치
+    rtCtrl.left = nGapX + nBtnWidth + nGapX;
+    rtCtrl.top = rtCtrl.top;
+    rtCtrl.right = rtCtrl.left + nBtnWidth;
+    rtCtrl.bottom = rtCtrl.top + nBtnHeight;
+    if (m_stPck1.GetSafeHwnd()) {
+        m_stPck1.MoveWindow(rtCtrl);
+        m_stPck1.SetFontSize(nFontSize, FW_BOLD);
+        m_stPck1.SetSkinBkColor(RGB_BG);
+    }
+
+    // Port1 Edit
+    rtCtrl.left = nGapX;
+    rtCtrl.top = rtCtrl.bottom + nGapY;
+    rtCtrl.right = rtCtrl.left + nBtnWidth;
+    rtCtrl.bottom = rtCtrl.top + nBtnHeight;
+    if (m_edPort1.GetSafeHwnd()) {
+        m_edPort1.MoveWindow(rtCtrl);
+        m_edPort1.SetFontSize(nFontSize);
+    }
+
+    // Pck1 Edit
+    rtCtrl.left = nGapX + nBtnWidth + nGapX;
+    rtCtrl.right = rtCtrl.left + nBtnWidth;
+    if (m_edPck1.GetSafeHwnd()) {
+        m_edPck1.MoveWindow(rtCtrl);
+        m_edPck1.SetFontSize(nFontSize);
+    }
+
+    // Port1 CN Button - 초기 상태 설정
+    rtCtrl.left = nGapX;
+    rtCtrl.top = rtCtrl.bottom + nGapY;
+    rtCtrl.right = rtCtrl.left + nBtnWidth/2;
+    rtCtrl.bottom = rtCtrl.top + nBtnHeight;
+    if (m_btnPort1Cn.GetSafeHwnd()) {
+        m_btnPort1Cn.MoveWindow(rtCtrl);
+        m_btnPort1Cn.SetFontSize(nFontSize, FW_BOLD);
+        m_btnPort1Cn.SetWindowTextW(L"DISCONNECTED");
+        m_btnPort1Cn.EnableWindow(TRUE);
+    }
+
+    // Pck1 CN Button - 초기 상태 설정
+    rtCtrl.left = nGapX + nBtnWidth + nGapX;
+    rtCtrl.right = rtCtrl.left + nBtnWidth/2;
+    if (m_btnPck1Cn.GetSafeHwnd()) {
+        m_btnPck1Cn.MoveWindow(rtCtrl);
+        m_btnPck1Cn.SetFontSize(nFontSize, FW_BOLD);
+        m_btnPck1Cn.SetWindowTextW(L"DISCONNECTED");
+        m_btnPck1Cn.EnableWindow(TRUE);
+    }
+
+    // Port1 Status Circle (CMenuButton 스타일 적용)
+    rtCtrl.left = nGapX;
+    rtCtrl.top = rtCtrl.bottom + nGapY; // CN 버튼 바로 아래로 이동
+    rtCtrl.right = rtCtrl.left + nBtnHeight; // 원 모양을 위한 정사각형
+    rtCtrl.bottom = rtCtrl.top + nBtnHeight;
+    if (m_btnPort1Status.GetSafeHwnd()) {
+        m_btnPort1Status.MoveWindow(rtCtrl);
+        m_btnPort1Status.InitStyle();
+
+        // m_examplestatus 값에 따라 초기 스타일 설정
+        if (m_examplestatus) {
+            m_btnPort1Status.SetSkinBkColor(RGB(0, 255, 0)); // 초록색
+        }
+        else {
+            m_btnPort1Status.SetSkinBkColor(RGB(192, 192, 192)); // 회색
+        }
+    }
+
+    // Pck1 Status Circle
+    rtCtrl.left = nGapX + nBtnWidth + nGapX;
+    rtCtrl.right = rtCtrl.left + nBtnHeight;
+    rtCtrl.bottom = rtCtrl.top + nBtnHeight;
+    if (m_btnPck1Status.GetSafeHwnd()) {
+        m_btnPck1Status.MoveWindow(rtCtrl);
+        m_btnPck1Status.InitStyle();
+
+        // m_examplestatus 값에 따라 초기 스타일 설정
+        if (m_examplestatus) {
+            m_btnPort1Status.SetSkinBkColor(RGB(0, 255, 0)); // 초록색
+        }
+        else {
+            m_btnPort1Status.SetSkinBkColor(RGB(192, 192, 192)); // 회색
+        }
+    }
+}
+
+void CWndTcp::OnBnClicked(UINT nID)
+{
+    CString strText;
+    CReconManager* pManager = AfxGetAppReconManager();
+    if (!pManager)
+        return;
+
+    switch (nID)
+    {
+    case IDC_BTN_PORT1CN:
+        m_btnPort1Cn.GetWindowText(strText);
+        if (strText == L"DISCONNECTED") {
+            m_btnPort1Cn.SetWindowTextW(L"CONNECTED");
+            pManager->SetTcpCN1(TRUE);
+        }
+        else {
+            m_btnPort1Cn.SetWindowTextW(L"DISCONNECTED");
+            pManager->SetTcpCN1(FALSE);
+        }
+        break;
+    case IDC_BTN_PORT1STATUS:
+        // 상태 토글
+        m_examplestatus = !m_examplestatus;
+
+        // 상태에 따른 버튼 스타일 변경
+        if (m_examplestatus) {
+            m_btnPort1Status.SetSkinBkColor(RGB(0, 255, 0)); // 초록색
+        }
+        else {
+            m_btnPort1Status.SetSkinBkColor(RGB(192, 192, 192)); // 회색
+        }
+        break;
+    case IDC_BTN_PCK1CN:
+        m_btnPck1Cn.GetWindowText(strText);
+        if (strText == L"DISCONNECTED") {
+            m_btnPck1Cn.SetWindowTextW(L"CONNECTED");
+            pManager->SetTcpPck1CN(TRUE);
+        }
+        else {
+            m_btnPck1Cn.SetWindowTextW(L"DISCONNECTED");
+            pManager->SetTcpPck1CN(FALSE);
+        }
+        break;
+    case IDC_BTN_PCK1STATUS:
+        // 상태 토글
+        m_examplestatus = !m_examplestatus;
+
+        // 상태에 따른 버튼 스타일 변경
+        if (m_examplestatus) {
+            m_btnPck1Status.SetSkinBkColor(RGB(0, 255, 0)); // 초록색
+        }
+        else {
+            m_btnPck1Status.SetSkinBkColor(RGB(192, 192, 192)); // 회색
+        }
+        break;
+    }
+
+    CXReconDoc* pDoc = AfxGetReconDocument();
+    if (pDoc)
+    {
+        pDoc->SaveReconParameter();
+    }
+
+    CWnd* pParent = GetParent();
+    if (pParent)
+    {
+        pParent->PostMessage(WM_RECON_UPDATE_PARAMS);
+    }
+}
+// OnChangeEditData: Edit Control 값 변경 처리
+void CWndTcp::OnChangeEditData(UINT nID)
+{
+    CString strText;
+    int nValue = 0;
+    double dValue = 0;
+    CReconManager* pManager = AfxGetAppReconManager();
+    if (!pManager)
+        return;
+
+    switch (nID)
+    {
+        // IP Address
+    case IDC_EDIT_IP:
+        m_edIP.GetWindowTextW(strText);
+        nValue = _ttoi(strText);
+        pManager->SetTcpIP(nValue);
+        break;
+
+        // Port 1
+    case IDC_EDIT_PORT1:
+        m_edPort1.GetWindowTextW(strText);
+        nValue = _ttoi(strText);
+        pManager->SetTcpPort1(nValue);
+        break;
+
+        // Port 2
+    //case IDC_EDIT_PORT2:
+    //    m_edPort2.GetWindowTextW(strText);
+    //    nValue = _ttoi(strText);
+    //    pManager->SetTcpPort2(nValue);
+    //    break;
+
+    //    // Port 3
+    //case IDC_EDIT_PORT3:
+    //    m_edPort3.GetWindowTextW(strText);
+    //    nValue = _ttoi(strText);
+    //    pManager->SetTcpPort3(nValue);
+    //    break;
+
+    //    // Port 4
+    //case IDC_EDIT_PORT4:
+    //    m_edPort4.GetWindowTextW(strText);
+    //    nValue = _ttoi(strText);
+    //    pManager->SetTcpPort4(nValue);
+    //    break;
+    // 
+    //PCK1
+    case IDC_EDIT_PCK1:
+        m_edPck1.GetWindowTextW(strText);
+        nValue = _ttoi(strText);
+        pManager->SetTcpPort1(nValue);
+        break;
+    }
+    CXReconDoc* pDoc = AfxGetReconDocument();
+    if (pDoc)
+    {
+        pDoc->SaveReconParameter();
+    }
+}
+
+void CWndTcp::UpdateReconParameter()
+{
+    CReconManager* pManager = AfxGetAppReconManager();
+    int nValue = 0;
+    BOOL bValue = FALSE;
+    CString strValue = _T("");
+    CString strp;
+
+    if (!pManager) {
+
+        // IP Address 업데이트
+        nValue = pManager->GetTcpIP();
+        strp.Format(_T("%d"), nValue);
+        m_edIP.SetWindowTextW(strp);
+
+        // Port 1
+        nValue = pManager->GetTcpPort1();
+        strp.Format(_T("%d"), nValue);
+        m_edPort1.SetWindowTextW(strp);
+
+        nValue = pManager->GetTcpCN1();
+        m_btnPort1Cn.SetCheck(nValue);
+
+        nValue = pManager->GetTcpStatus1();
+        m_btnPort1Status.SetCheck(nValue);
+
+
+        //bValue = pManager->GetTcpStatus1(i); // 포트 번호는 1부터 시작
+        //m_btnPort1Status[i].SetConnected(bValue);
+
+        // Port 2
+        /*
+        nValue = pManager->GetTcpPort2();
+        strp.Format(_T("%d"), nValue);
+        m_edPort2.SetWindowTextW(strp);
+
+        bValue = pManager->GetTcpCN2();
+        m_btnPort2Cn.EnableWindow(!bValue);
+
+        bValue = pManager->GetTcpStatus2();
+        m_btnPort2Status.SetWindowTextW(bValue ? _T("Connected") : _T("Disconnected"));
+
+        // Port 3
+        nValue = pManager->GetTcpPort3();
+        strp.Format(_T("%d"), nValue);
+        m_edPort3.SetWindowTextW(strp);
+
+        bValue = pManager->GetTcpCN3();
+        m_btnPort3Cn.EnableWindow(!bValue);
+
+        bValue = pManager->GetTcpStatus3();
+        m_btnPort3Status.SetWindowTextW(bValue ? _T("Connected") : _T("Disconnected"));
+
+        // Port 4
+        nValue = pManager->GetTcpPort4();
+        strp.Format(_T("%d"), nValue);
+        m_edPort4.SetWindowTextW(strp);
+
+        bValue = pManager->GetTcpCN4();
+        m_btnPort4Cn.EnableWindow(!bValue);
+
+        bValue = pManager->GetTcpStatus4();
+        m_btnPort4Status.SetWindowTextW(bValue ? _T("Connected") : _T("Disconnected"));
+        */
+
+        // Pck 1
+        nValue = pManager->GetTcpPck1();
+        strp.Format(_T("%d"), nValue);
+        m_edPck1.SetWindowTextW(strp);
+
+        nValue = pManager->GetTcpPck1CN();
+        m_btnPck1Cn.SetCheck(nValue);
+
+        nValue = pManager->GetTcpPck1Status();
+        m_btnPort1Status.SetCheck(nValue);
+
+        //bValue = pManager->GetTcpPck1Status(); // 포트 번호는 1부터 시작
+        //m_btnPortStatus[i].SetConnected(bValue);
+    }
+}

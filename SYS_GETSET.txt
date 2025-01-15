@@ -1,0 +1,22 @@
+[get/set]
+m_edIP			GetTcpIP			SetTcpIP
+
+m_edPort1		GetTcpPort1		SetTcpPort1
+m_btnPort1Cn		GetTcpCN1		SetTcpCN1
+m_btnPort1Status		GetTcpStatus1		SetTcpStatus1
+
+m_edPort2		GetTcpPort2		SetTcpPort2
+m_btnPort2Cn		GetTcpCN2		SetTcpCN2
+m_btnPort2Status		GetTcpStatus2		SetTcpStatus2
+
+m_edPort3		GetTcpPort3		SetTcpPort3
+m_btnPort3Cn		GetTcpCN3		SetTcpCN3
+m_btnPort3Status		GetTcpStatus3		SetTcpStatus3
+
+m_edPort4		GetTcpPort4		SetTcpPort4
+m_btnPort4Cn		GetTcpCN4		SetTcpCN4
+m_btnPort4Status		GetTcpStatus4		SetTcpStatus4
+
+m_edPck1		GetTcpPck1		SetTcpPck1
+m_btnPck1Cn		GetTcpPck1CN		SetTcpPck1CN
+m_btnPck1Status		GetTcpPck1Status		SetTcpPck1Status
